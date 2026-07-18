@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JejakDuit - Dashboard Keuangan</title>
+    <!-- Google Fonts: Plus Jakarta Sans for modern premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #090d16;
+            --bg-card: #121826;
+            --bg-card-hover: #1b2336;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.15);
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.15);
+            --danger: #f43f5e;
+            --danger-glow: rgba(244, 63, 94, 0.15);
+            --border-color: #1e293b;
+            --accent-pemasukan: #10b981;
+            --accent-pengeluaran: #f43f5e;
+            --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Ambient background glow */
+        .ambient-glow {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, rgba(0,0,0,0) 70%);
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        header {
+            border-bottom: 1px solid var(--border-color);
+            background-color: rgba(18, 24, 38, 0.6);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1.25rem 2rem;
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .brand-logo {
+            background: linear-gradient(135deg, #818cf8 0%, var(--primary) 100%);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .brand-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #ffffff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .summary-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+
+        .summary-card.saldo::before { background-color: var(--primary); }
+        .summary-card.pemasukan::before { background-color: var(--success); }
+        .summary-card.pengeluaran::before { background-color: var(--danger); }
+
+        .summary-card:hover {
+            transform: translateY(-2px);
+            border-color: #334155;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .saldo .card-icon { background-color: var(--primary-glow); color: #818cf8; }
+        .pemasukan .card-icon { background-color: var(--success-glow); color: var(--success); }
+        .pengeluaran .card-icon { background-color: var(--danger-glow); color: var(--danger); }
+
+        .card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .card-title {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .card-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* Two Column Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 380px 1fr;
+            }
+        }
+
+        /* Form Card */
+        .form-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: fit-content;
+            position: sticky;
+            top: 6rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-title span {
+            font-size: 0.8rem;
+            font-weight: 500;
+            background-color: var(--border-color);
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            color: var(--text-muted);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        /* Segmented Toggle Control for Transaksi Type */
+        .transaction-toggle {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 4px;
+            cursor: pointer;
+        }
+
+        .toggle-btn {
+            padding: 0.6rem;
+            text-align: center;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            user-select: none;
+            color: var(--text-muted);
+        }
+
+        .toggle-btn.active.pemasukan {
+            background-color: var(--success);
+            color: #0f172a;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+        }
+
+        .toggle-btn.active.pengeluaran {
+            background-color: var(--danger);
+            color: white;
+            box-shadow: 0 4px 10px rgba(244, 63, 94, 0.3);
+        }
+
+        .form-input {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            color: var(--text-main);
+            font-family: var(--font-family);
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+        }
+
+        .form-input::placeholder {
+            color: #475569;
+        }
+
+        /* Live Preview Styling */
+        .live-preview {
+            background-color: rgba(15, 23, 42, 0.4);
+            border-left: 3px solid var(--primary);
+            padding: 0.6rem 0.8rem;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.8rem;
+            display: none;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .live-preview.active {
+            display: flex;
+        }
+
+        .preview-label {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .preview-value {
+            color: var(--text-main);
+            font-weight: 700;
+            word-break: break-all;
+        }
+
+        .preview-terbilang {
+            color: #38bdf8;
+            font-style: italic;
+            font-weight: 500;
+        }
+
+        .preview-warning {
+            color: #fb7185;
+            background-color: rgba(244, 63, 94, 0.1);
+            padding: 0.4rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            display: none;
+            font-weight: 500;
+        }
+
+        .btn-logout {
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .btn-logout:hover {
+            color: var(--danger);
+            border-color: var(--danger);
+            background-color: var(--danger-glow);
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 0.85rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+        }
+
+        .submit-btn:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+        }
+
+        .submit-btn:active {
+            transform: translateY(1px);
+        }
+
+        .submit-btn:disabled {
+            background: #334155;
+            color: #64748b;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* List/Table Card */
+        .list-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            min-height: 500px;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .list-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .search-container {
+            position: relative;
+            max-width: 320px;
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100%;
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.6rem 1rem 0.6rem 2.25rem;
+            color: var(--text-main);
+            font-size: 0.875rem;
+            font-family: var(--font-family);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Custom Beautiful Table styling */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background-color: rgba(15, 23, 42, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+
+        th {
+            background-color: rgba(15, 23, 42, 0.8);
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr {
+            transition: background-color 0.2s ease;
+        }
+
+        tr:hover {
+            background-color: rgba(30, 41, 59, 0.3);
+        }
+
+        /* Transaction Types Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .badge.pemasukan {
+            background-color: var(--success-glow);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge.pengeluaran {
+            background-color: var(--danger-glow);
+            color: var(--danger);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+        }
+
+        .nominal-cell {
+            font-weight: 700;
+            font-family: monospace;
+            font-size: 0.95rem;
+        }
+
+        .nominal-cell.pemasukan {
+            color: var(--success);
+        }
+
+        .nominal-cell.pengeluaran {
+            color: var(--danger);
+        }
+
+        .desc-text {
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: inline-block;
+            vertical-align: middle;
+            color: var(--text-main);
+        }
+
+        .desc-empty {
+            color: #475569;
+            font-style: italic;
+        }
+
+        /* Action Buttons */
+        .actions-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .btn-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+
+        .btn-action:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+
+        .btn-action.edit:hover {
+            color: #38bdf8;
+            background-color: rgba(56, 189, 248, 0.1);
+        }
+
+        .btn-action.delete:hover {
+            color: var(--danger);
+            background-color: var(--danger-glow);
+        }
+
+        /* Dialog / Modal Confirmation */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            max-width: 440px;
+            width: 90%;
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            transform: scale(0.95);
+            transition: transform 0.2s ease;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            font-size: 1.15rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-body {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        .btn-modal {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-modal.cancel {
+            background-color: var(--border-color);
+            color: var(--text-main);
+        }
+
+        .btn-modal.cancel:hover {
+            background-color: #334155;
+        }
+
+        .btn-modal.confirm-delete {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-modal.confirm-delete:hover {
+            opacity: 0.9;
+        }
+
+        /* Toast Notification system */
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .toast {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            max-width: 350px;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast-icon {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .toast.success .toast-icon { color: var(--success); }
+        .toast.error .toast-icon { color: var(--danger); }
+
+        /* Loader Animation */
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Inline edit style */
+        .inline-edit-input {
+            background-color: var(--bg-dark);
+            border: 1px solid var(--primary);
+            border-radius: 6px;
+            padding: 0.4rem;
+            color: var(--text-main);
+            font-family: var(--font-family);
+            font-size: 0.875rem;
+            width: 100%;
+        }
+        .inline-edit-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
+        }
+
+        /* No data styling */
+        .no-data {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .no-data-icon {
+            font-size: 3rem;
+            color: #334155;
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow"></div>
+    
+    <header>
+        <div class="header-container">
+            <a href="/" class="brand">
+                <div class="brand-logo">JD</div>
+                <div class="brand-name">JejakDuit</div>
+            </a>
+            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;" class="header-tagline">
+                    Kelola Pengeluaran & Pemasukan dengan Cerdas
+                </div>
+                <a href="/logout" class="btn-logout">
+                    <span>Keluar</span> 🚪
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Summary/Saldo cards -->
+        <section class="summary-grid">
+            <div class="summary-card saldo">
+                <div class="card-icon">💰</div>
+                <div class="card-info">
+                    <span class="card-title">Total Saldo (GW)</span>
+                    <span class="card-value" id="saldo-value">Rp 0</span>
+                </div>
+            </div>
+            <div class="summary-card pemasukan">
+                <div class="card-icon">📈</div>
+                <div class="card-info">
+                    <span class="card-title">Total Pemasukan</span>
+                    <span class="card-value" id="pemasukan-value">Rp 0</span>
+                </div>
+            </div>
+            <div class="summary-card pengeluaran">
+                <div class="card-icon">📉</div>
+                <div class="card-info">
+                    <span class="card-title">Total Pengeluaran</span>
+                    <span class="card-value" id="pengeluaran-value">Rp 0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Two Column Main Layout -->
+        <section class="main-layout">
+            <!-- Left Column: Add Transaction Form -->
+            <div class="form-card">
+                <h2 class="form-title">
+                    Tambah Transaksi <span>Manual</span>
+                </h2>
+                
+                <form id="tambah-form" onsubmit="handleTambah(event)">
+                    <div class="form-group">
+                        <label class="form-label">Jenis Transaksi</label>
+                        <div class="transaction-toggle" id="jenis-toggle">
+                            <div class="toggle-btn active pemasukan" onclick="setJenis('pemasukan')">Pemasukan</div>
+                            <div class="toggle-btn pengeluaran" onclick="setJenis('pengeluaran')">Pengeluaran</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label class="form-label" for="input-nominal">Nominal (Rupiah)</label>
+                        <!-- Custom text input to dynamically capture digits and mask with Indonesian format -->
+                        <input type="text" id="input-nominal" class="form-input" 
+                               placeholder="Contoh: 15.000 atau 150000" autocomplete="off" required
+                               oninput="formatNominal(this)">
+                        
+                        <!-- Smart live preview block to prevent nominal format errors -->
+                        <div class="live-preview" id="live-preview-box">
+                            <span class="preview-label">Jumlah Terbaca:</span>
+                            <span class="preview-value" id="preview-formatted">Rp 0</span>
+                            <span class="preview-terbilang" id="preview-terbilang">Nol rupiah</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label class="form-label" for="input-penerima">Penerima / Sumber</label>
+                        <input type="text" id="input-penerima" class="form-input" 
+                               placeholder="Nama penerima atau asal uang (misal: Gaji, Makan Siang)" required>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 1rem; margin-bottom: 1.5rem;">
+                        <label class="form-label" for="input-deskripsi">Deskripsi</label>
+                        <input type="text" id="input-deskripsi" class="form-input" 
+                               placeholder="Keterangan transaksi (misal: Beli bakso di dekat kantor)">
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submit-button" style="width: 100%;">
+                        <span id="btn-text">Simpan Transaksi</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Right Column: Transaction Log Table -->
+            <div class="list-card">
+                <div class="list-header">
+                    <h2 class="list-title">
+                        Log Transaksi 📝
+                    </h2>
+                    
+                    <div class="search-container">
+                        <!-- Search icon svg -->
+                        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.637 10.637Z" />
+                        </svg>
+                        <input type="text" id="search-bar" class="search-input" placeholder="Cari deskripsi, penerima, atau no. ref..." oninput="handleSearch(this.value)">
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="logs-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">Waktu</th>
+                                <th style="width: 18%;">No. Referensi</th>
+                                <th style="width: 15%;">Penerima</th>
+                                <th style="width: 12%;">Jenis</th>
+                                <th style="width: 15%;">Nominal</th>
+                                <th style="width: 15%;">Deskripsi (Klik / Edit)</th>
+                                <th style="width: 10%; text-align: center;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logs-body">
+                            <!-- Table rows will be dynamically populated here -->
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 3rem;">
+                                    <div class="spinner"></div>
+                                    <div style="margin-top: 0.5rem; color: var(--text-muted);">Memuat data transaksi...</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <span style="font-size: 1.5rem;">⚠️</span> Hapus Transaksi
+            </div>
+            <div class="modal-body">
+                Apakah Anda yakin ingin menghapus transaksi ini? Tindakan ini bersifat permanen dan saldo Anda akan terupdate kembali secara otomatis.
+                <div style="margin-top: 1rem; padding: 0.75rem; background-color: rgba(15,23,42,0.6); border-radius: 8px; border: 1px solid var(--border-color)">
+                    <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">No. Referensi:</span>
+                    <strong id="delete-ref-display" style="font-family: monospace; color: var(--text-main);"></strong>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.5rem;">Nominal:</span>
+                    <strong id="delete-nominal-display" style="color: var(--text-main);"></strong>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal cancel" onclick="closeDeleteModal()">Batal</button>
+                <button class="btn-modal confirm-delete" id="confirm-delete-btn" onclick="executeDelete()">Hapus Permanen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script>
+        // Global States
+        let allTransactions = [];
+        let filteredTransactions = [];
+        let selectedJenis = 'pemasukan';
+        let rawNominalValue = 0;
+        let pendingDeleteRef = null;
+
+        // Fetch logs on startup
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchData();
+        });
+
+        // 1. Fetch data from backend
+        async function fetchData() {
+            try {
+                // Fetch logs
+                const response = await fetch('/logs');
+                if (!response.ok) throw new Error('Gagal mengambil data log.');
+                allTransactions = await response.json();
+                filteredTransactions = [...allTransactions];
+                
+                // Fetch saldo
+                const saldoResponse = await fetch('/logs/saldo');
+                if (!saldoResponse.ok) throw new Error('Gagal mengambil total saldo.');
+                const saldo = await saldoResponse.json();
+
+                renderDashboard(saldo);
+            } catch (error) {
+                console.error(error);
+                showToast(error.message || 'Terjadi kesalahan sistem.', 'error');
+            }
+        }
+
+        // 2. Render summary cards and log table
+        function renderDashboard(saldo) {
+            // Update saldo cards
+            document.getElementById('saldo-value').innerText = formatRupiah(saldo);
+            
+            // Calculate total pemasukan and pengeluaran from current transactions
+            let totalMasuk = 0;
+            let totalKeluar = 0;
+            allTransactions.forEach(t => {
+                if (t.jenis === 'pemasukan') {
+                    totalMasuk += parseFloat(t.nominal);
+                } else if (t.jenis === 'pengeluaran') {
+                    totalKeluar += parseFloat(t.nominal);
+                }
+            });
+            document.getElementById('pemasukan-value').innerText = formatRupiah(totalMasuk);
+            document.getElementById('pengeluaran-value').innerText = formatRupiah(totalKeluar);
+
+            // Render table
+            renderTable(filteredTransactions);
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('logs-body');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7">
+                            <div class="no-data">
+                                <div class="no-data-icon">📁</div>
+                                <div>Tidak ada transaksi yang ditemukan.</div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.id = `row-${item.no_referensi}`;
+
+                const waktu = formatWaktu(item.waktu_transaksi);
+                const nominal = formatRupiah(item.nominal);
+                const jenisClass = item.jenis === 'pemasukan' ? 'pemasukan' : 'pengeluaran';
+                
+                const descContent = item.deskripsi 
+                    ? `<span class="desc-text" id="desc-text-${item.no_referensi}">${escapeHtml(item.deskripsi)}</span>` 
+                    : `<span class="desc-text desc-empty" id="desc-text-${item.no_referensi}">Tidak ada deskripsi</span>`;
+
+                tr.innerHTML = `
+                    <td>${waktu}</td>
+                    <td style="font-family: monospace; font-size: 0.8rem; font-weight: 500;">${item.no_referensi}</td>
+                    <td>${escapeHtml(item.penerima || '-')}</td>
+                    <td><span class="badge ${jenisClass}">${item.jenis}</span></td>
+                    <td class="nominal-cell ${jenisClass}">${nominal}</td>
+                    <td>
+                        <div id="desc-container-${item.no_referensi}" style="display: flex; align-items: center; gap: 0.5rem; justify-content: space-between;">
+                            ${descContent}
+                            <button class="btn-action edit" onclick="startEditDescription('${item.no_referensi}')" title="Edit Deskripsi">✏️</button>
+                        </div>
+                    </td>
+                    <td style="text-align: center;">
+                        <button class="btn-action delete" onclick="confirmDelete('${item.no_referensi}', ${item.nominal})" title="Hapus Transaksi">🗑️</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 3. Set Jenis Transaksi (Toggle Pemasukan/Pengeluaran)
+        function setJenis(jenis) {
+            selectedJenis = jenis;
+            
+            const btnPemasukan = document.querySelector('#jenis-toggle .toggle-btn.pemasukan');
+            const btnPengeluaran = document.querySelector('#jenis-toggle .toggle-btn.pengeluaran');
+            const submitBtn = document.getElementById('submit-button');
+
+            if (jenis === 'pemasukan') {
+                btnPemasukan.classList.add('active');
+                btnPengeluaran.classList.remove('active');
+                submitBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                submitBtn.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.25)';
+            } else {
+                btnPemasukan.classList.remove('active');
+                btnPengeluaran.classList.add('active');
+                submitBtn.style.background = 'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)';
+                submitBtn.style.boxShadow = '0 4px 12px rgba(244, 63, 94, 0.25)';
+            }
+        }
+
+        // 4. Format Nominal Live Input
+        function formatNominal(input) {
+            // Get original value
+            let val = input.value;
+            
+            // Clean value of non-digits to get raw integer value
+            let cleanedVal = val.replace(/[^\d]/g, '');
+            rawNominalValue = cleanedVal ? parseInt(cleanedVal) : 0;
+
+            const previewBox = document.getElementById('live-preview-box');
+            const previewFormatted = document.getElementById('preview-formatted');
+            const previewTerbilang = document.getElementById('preview-terbilang');
+
+            if (val === '') {
+                previewBox.classList.remove('active');
+                return;
+            }
+
+            // Show active live-preview
+            previewBox.classList.add('active');
+            previewFormatted.innerText = formatRupiah(rawNominalValue);
+            previewTerbilang.innerText = getTerbilang(rawNominalValue);
+
+            // Format the input field value itself as the user types (with dot separators)
+            if (cleanedVal) {
+                input.value = parseInt(cleanedVal).toLocaleString('id-ID');
+            } else {
+                input.value = '';
+            }
+        }
+
+        // 5. Handle Tambah Transaksi
+        async function handleTambah(event) {
+            event.preventDefault();
+
+            const inputPenerima = document.getElementById('input-penerima');
+            const inputDeskripsi = document.getElementById('input-deskripsi');
+            const submitBtn = document.getElementById('submit-button');
+
+            if (rawNominalValue <= 0) {
+                showToast('Nominal harus lebih dari Rp 0', 'error');
+                return;
+            }
+
+            const nominal = rawNominalValue;
+            const penerima = inputPenerima.value.trim();
+            const deskripsi = inputDeskripsi.value.trim();
+            const jenis = selectedJenis;
+
+            // Set loading state
+            submitBtn.disabled = true;
+            const originalText = document.getElementById('btn-text').innerText;
+            document.getElementById('btn-text').innerHTML = `<div class="spinner"></div> Menyimpan...`;
+
+            try {
+                // API endpoint accepts nominal, deskripsi, jenis, penerima as query params
+                const params = new URLSearchParams({
+                    nominal: nominal.toString(),
+                    deskripsi: deskripsi,
+                    jenis: jenis,
+                    penerima: penerima
+                });
+
+                const response = await fetch(`/logs/tambah-manual?${params.toString()}`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.detail || 'Gagal menambahkan transaksi.');
+                }
+
+                const result = await response.json();
+                
+                showToast(`Transaksi ${jenis === 'pemasukan' ? 'pemasukan' : 'pengeluaran'} sebesar ${formatRupiah(nominal)} berhasil disimpan!`, 'success');
+                
+                // Clear Form
+                document.getElementById('input-nominal').value = '';
+                inputPenerima.value = '';
+                inputDeskripsi.value = '';
+                rawNominalValue = 0;
+                document.getElementById('live-preview-box').classList.remove('active');
+
+                // Refresh data
+                await fetchData();
+            } catch (error) {
+                console.error(error);
+                showToast(error.message || 'Gagal menyimpan transaksi.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                document.getElementById('btn-text').innerText = originalText;
+            }
+        }
+
+        // 6. Edit Deskripsi Inline
+        let isEditingRef = null;
+        let originalTextEdit = "";
+
+        function startEditDescription(noRef) {
+            if (isEditingRef) {
+                // Cancel current edit first
+                cancelEditDescription(isEditingRef);
+            }
+
+            isEditingRef = noRef;
+            const container = document.getElementById(`desc-container-${noRef}`);
+            const textSpan = document.getElementById(`desc-text-${noRef}`);
+            
+            // Check if current text is the empty placeholder
+            originalTextEdit = textSpan.classList.contains('desc-empty') ? "" : textSpan.innerText;
+
+            container.innerHTML = `
+                <input type="text" id="edit-input-${noRef}" class="inline-edit-input" value="${escapeHtml(originalTextEdit)}">
+                <div style="display:flex; gap:0.25rem;">
+                    <button class="btn-action" onclick="saveDescription('${noRef}')" style="color:var(--success);" title="Simpan">✅</button>
+                    <button class="btn-action" onclick="cancelEditDescription('${noRef}')" style="color:var(--danger);" title="Batal">❌</button>
+                </div>
+            `;
+            
+            const input = document.getElementById(`edit-input-${noRef}`);
+            input.focus();
+            input.select();
+            
+            // Allow save on Enter key press
+            input.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') saveDescription(noRef);
+                if (e.key === 'Escape') cancelEditDescription(noRef);
+            });
+        }
+
+        async function saveDescription(noRef) {
+            const input = document.getElementById(`edit-input-${noRef}`);
+            const newDesc = input.value.trim();
+
+            try {
+                const params = new URLSearchParams({
+                    deskripsi_baru: newDesc
+                });
+
+                const response = await fetch(`/logs/editDeskripsi/${noRef}?${params.toString()}`, {
+                    method: 'PATCH'
+                });
+
+                if (!response.ok) throw new Error('Gagal mengupdate deskripsi.');
+
+                showToast('Deskripsi transaksi berhasil diubah!', 'success');
+                
+                // Fetch data again to refresh
+                await fetchData();
+                isEditingRef = null;
+            } catch (error) {
+                console.error(error);
+                showToast(error.message || 'Gagal mengubah deskripsi.', 'error');
+            }
+        }
+
+        function cancelEditDescription(noRef) {
+            const container = document.getElementById(`desc-container-${noRef}`);
+            const displaySpan = originalTextEdit 
+                ? `<span class="desc-text" id="desc-text-${noRef}">${escapeHtml(originalTextEdit)}</span>` 
+                : `<span class="desc-text desc-empty" id="desc-text-${noRef}">Tidak ada deskripsi</span>`;
+
+            container.innerHTML = `
+                ${displaySpan}
+                <button class="btn-action edit" onclick="startEditDescription('${noRef}')" title="Edit Deskripsi">✏️</button>
+            `;
+            isEditingRef = null;
+        }
+
+        // 7. Delete transaction confirmation
+        function confirmDelete(noRef, nominal) {
+            pendingDeleteRef = noRef;
+            document.getElementById('delete-ref-display').innerText = noRef;
+            document.getElementById('delete-nominal-display').innerText = formatRupiah(nominal);
+            document.getElementById('delete-modal').classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.remove('active');
+            pendingDeleteRef = null;
+        }
+
+        async function executeDelete() {
+            if (!pendingDeleteRef) return;
+            
+            const btn = document.getElementById('confirm-delete-btn');
+            btn.disabled = true;
+            btn.innerHTML = `<div class="spinner"></div> Menghapus...`;
+
+            try {
+                const response = await fetch(`/logs/${pendingDeleteRef}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error('Gagal menghapus transaksi.');
+
+                showToast(`Transaksi ${pendingDeleteRef} berhasil dihapus.`, 'success');
+                closeDeleteModal();
+                await fetchData();
+            } catch (error) {
+                console.error(error);
+                showToast(error.message || 'Gagal menghapus transaksi.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Hapus Permanen';
+            }
+        }
+
+        // 8. Client-side Search filter
+        function handleSearch(query) {
+            const cleanQuery = query.toLowerCase().trim();
+            if (!cleanQuery) {
+                filteredTransactions = [...allTransactions];
+            } else {
+                filteredTransactions = allTransactions.filter(item => {
+                    const noRef = (item.no_referensi || '').toLowerCase();
+                    const penerima = (item.penerima || '').toLowerCase();
+                    const desc = (item.deskripsi || '').toLowerCase();
+                    const nominalStr = (item.nominal || '').toString();
+                    return noRef.includes(cleanQuery) || 
+                           penerima.includes(cleanQuery) || 
+                           desc.includes(cleanQuery) ||
+                           nominalStr.includes(cleanQuery);
+                });
+            }
+            renderTable(filteredTransactions);
+        }
+
+        // Helper Functions
+        function formatRupiah(number) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(number);
+        }
+
+        function formatWaktu(datetimeStr) {
+            if (!datetimeStr) return '-';
+            const dt = new Date(datetimeStr);
+            if (isNaN(dt.getTime())) return datetimeStr;
+            
+            // Format to DD/MM/YYYY HH:MM
+            const day = String(dt.getDate()).padStart(2, '0');
+            const month = String(dt.getMonth() + 1).padStart(2, '0');
+            const year = dt.getFullYear();
+            const hours = String(dt.getHours()).padStart(2, '0');
+            const minutes = String(dt.getMinutes()).padStart(2, '0');
+            return `${day}/${month}/${year} ${hours}:${minutes}`;
+        }
+
+        // Escape helper to prevent XSS
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'success' ? '✅' : '❌';
+            
+            toast.innerHTML = `
+                <span class="toast-icon">${icon}</span>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            // Hide & Remove after 4s
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Smart Indonesian conversion from Number to Words (Terbilang)
+        function getTerbilang(angka) {
+            angka = Math.floor(Number(angka));
+            if (angka === 0) return "nol rupiah";
+            if (angka < 0) return "minus " + getTerbilang(Math.abs(angka));
+
+            const words = ["", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas"];
+            
+            function konversi(n) {
+                if (n < 12) return words[n];
+                if (n < 20) return words[n - 10] + " belas";
+                if (n < 100) return words[Math.floor(n / 10)] + " puluh " + words[n % 10];
+                if (n < 200) return "seratus " + konversi(n - 100);
+                if (n < 1000) return words[Math.floor(n / 100)] + " ratus " + konversi(n % 100);
+                if (n < 2000) return "seribu " + konversi(n - 1000);
+                if (n < 1000000) return konversi(Math.floor(n / 1000)) + " ribu " + konversi(n % 1000);
+                if (n < 1000000000) return konversi(Math.floor(n / 1000000)) + " juta " + konversi(n % 1000000);
+                if (n < 1000000000000) return konversi(Math.floor(n / 1000000000)) + " milyar " + konversi(n % 1000000000);
+                return "angka terlalu besar";
+            }
+            
+            let teks = konversi(angka).trim().replace(/\s+/g, " ");
+            // Capitalize first letter
+            return teks.charAt(0).toUpperCase() + teks.slice(1) + " rupiah";
+        }
+    </script>
+</body>
+</html>
