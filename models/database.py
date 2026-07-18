@@ -31,6 +31,8 @@ def get_database():
     finally:
         db.close()
 
+def init_database():
+    Base.metadata.create_all(bind=engine)
 
 
 

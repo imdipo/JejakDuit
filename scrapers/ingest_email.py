@@ -3,10 +3,12 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from models.database import SessionLocal
+from models.database import SessionLocal, init_database
 from models.log_duit import LogDuit, jenisTransaksi
 # fungsi-fungsi bersih-bersih dari file sebelah
 from scrapers.parser_email import read_gmail, parse_email, reformatting 
+
+init_database()
 
 def save_to_postgres(data_siap_db):
     db = SessionLocal()
@@ -31,7 +33,7 @@ def save_to_postgres(data_siap_db):
         db.commit()
         print("Semua data baru berhasil disimpan ke PostgreSQL dengan selamat!")
     except Exception as e:
-        db.rollback()
+        db.rollback()   
         print(f"error pas save ke DB: {e}")
     finally:
         db.close()
