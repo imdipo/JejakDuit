@@ -44,4 +44,14 @@ def create_uang_masuk(db:Session, nominal: Decimal, deskripsi: str, jenis: str, 
     return transaksi_baru
 
 
+def delete_transaksi(db: Session, nomor_referensi: str):
+    db_log = db.query(LogDuit).filter(LogDuit.no_referensi == nomor_referensi).first()
+    if db_log:
+        db.delete(db_log)
+        db.commit()
+        return True
+    return False
+
+
+
          
