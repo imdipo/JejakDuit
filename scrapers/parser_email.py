@@ -2,12 +2,17 @@ from bs4 import BeautifulSoup
 from get_email import read_gmail
 from decimal import Decimal
 from datetime import datetime
+import re
 
 mapping_info = {
     "No. Referensi": "nomorReferensi",
+    "Nomor Referensi": "nomorReferensi",
     "Tanggal": "tanggal",
     "Jam": "jam",
-    "Nominal Transaksi": "nominal"
+
+    "Nominal Transaksi": "nominal",
+    "Nominal Top-up": "nominal",
+    "Proteksi Jiwa": "nominal",  
 }
 
 def parse_email(html_mentah):
@@ -15,8 +20,12 @@ def parse_email(html_mentah):
     for html in html_mentah:
         data_bersih = {}
         soup = BeautifulSoup(html, "html.parser")
-        penerima = soup.find("td", style=lambda s:s and "background-color:#fafafa" in s)
-        nama_penerima = penerima.find("h4").get_text(strip=True)
+        penerima = soup.find("td", style=lambda s: s and "background-color:#fafafa" in re.sub(r"\s+", "", s))
+
+        nama_penerima = None
+        if penerima:
+            nama_penerima = penerima.find("h4").get_text(strip=True)
+        
         print(f"nama penerima: {nama_penerima}")
 
         data_bersih["penerima"] = nama_penerima
@@ -28,14 +37,13 @@ def parse_email(html_mentah):
                 label = data[0].get_text(strip=True)
                 value = data[1].get_text(strip=True)
 
-                if label in ['Tanggal', 'Jam', 'Nominal Transaksi', 'No. Referensi']:
+                if label in mapping_info:
                     data_bersih[mapping_info[label]] = value
         
         print(f"ini data bersih dari parse_email: {data_bersih}")
 
         html_bersih.append(data_bersih)
 
-        
     return html_bersih
 
 def bersihkan_dan_gabungkan_waktu(tanggal_str, jam_str):
