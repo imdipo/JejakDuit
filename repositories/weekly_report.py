@@ -10,14 +10,13 @@ def laporan_mingguan(db:Session):
         .all()
     )
 
+    if not list_transaksi:
+        return "Tidak ada transaksi dalam 7 hari terakhir."
+    
+    teks = "DAFTAR TRANSAKSI 7 HARI TERAKHIR:\n"
+
     log_transaksi_rapih = []
     for data in list_transaksi:
-        log_transaksi_rapih.append({
-            "tanggal transaksi": data.waktu_transaksi.strftime("%Y-%m-%d %H:%M"),
-            "kategori": data.jenis,
-            "penerima": data.penerima,
-            "nominal": f"Rp {data.nominal}",
-            "deskripsi": data.deskripsi
-        })
+        teks += f"- [{data.waktu_transaksi.strftime('%Y-%m-%d')}] {data.jenis.upper()}: Rp{data.nominal:,.0f} | Penerima: {data.penerima} | Ket: {data.keterangan}\n"
     
     return log_transaksi_rapih
