@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from models.database import SessionLocal
-from models.insights import laporanMingguan
+from models.insights import laporan_mingguan
 
 def ambil_laporan_mingguan(limit: int=4):
     """
@@ -11,15 +11,16 @@ def ambil_laporan_mingguan(limit: int=4):
     db = SessionLocal()
     try: 
         laporan = (
-            db.query(laporanMingguan).order_by(laporanMingguan.tanggal_dibuat.desc())
+            db.query(laporan_mingguan).order_by(laporan_mingguan.tanggal_dibuat.desc())
             .limit(limit).all()
         )
     
         isi_laporan_mingguan = []
-        for log in laporan:
+        for insight in laporan:
             item = {
-                "tanggal_laporan_dibuat": log.tanggal_dibuat.strftime("%Y-%m-%d"),
-                "detall_insight": log.insight_data,
+                "tanggal_laporan_dibuat": insight.tanggal_dibuat.strftime("%Y-%m-%d"),
+                "periode": insight.periode,
+                "detall_insight": insight.insight_data,
             }
             isi_laporan_mingguan.append(item)
         
