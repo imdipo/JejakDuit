@@ -32,7 +32,10 @@ def get_database():
         db.close()
 
 def init_database():
+    import models.log_duit
+    import models.insights
     Base.metadata.create_all(bind=engine)
+
 
 
 
