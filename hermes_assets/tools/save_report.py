@@ -23,6 +23,8 @@ def simpan_laporan_ke_db(tipe_laporan: str, json_data_str: str, periode: str = N
             - Jika annual: 'YYYY' (contoh: '2026' untuk tahun 2026)
     """
 
+    hari_ini = datetime.now()
+
     tipe_clean = tipe_laporan.lower().strip()
     if tipe_clean not in MAP_LAPORAN:
         return f"Gagal: Tipe laporan '{tipe_laporan}' tidak valid. Gunakan 'weekly', 'monthly', atau 'annual'."
@@ -32,9 +34,19 @@ def simpan_laporan_ke_db(tipe_laporan: str, json_data_str: str, periode: str = N
     except json.JSONDecodeError as err:
         return f"Gagal: Format JSON tidak valid. detail: {str(err)}"
     
-    with SessionLocal() as db: # db session context manager katanya
+    with SessionLocal() as db:
         try:
             ModelClass = MAP_LAPORAN[tipe_clean]
+            
+            now = datetime.now()
+            if tipe_clean == "weekly":
+                year, week_num, _ = now.isocalendar()
+                periode = f"{year}-W{week_num:02d}"
+            elif tipe_clean == "monthly":
+                periode = now.strftime("%Y-%m")
+            elif tipe_clean == "annual":
+                periode = now.strftime("%Y")
+             
             laporan = ModelClass(
                 tanggal_dibuat = datetime.now(),
                 periode = periode,
