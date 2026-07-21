@@ -14,4 +14,4 @@ penjelasannya masih dibuat, nanti akan diupdate readme nya hehe. sementara pake 
 ![simple work flow](asset/mermaid.png)
 
 buat simpen log transaksi tinggal bikin dulu credentialnya, terus dapetin tokennya. bikin databasenya. jangan lupa isi .env
-abis itu udah deh tinggal running ```ingest_email.py```. selebihnya, masih dibikin penjelasannya 
+abis itu udah deh tinggal running ```ingest_email.py```. selebihnya, masih dibikin penjelasannya hehe ditunggu ya 👉👈
