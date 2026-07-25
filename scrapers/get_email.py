@@ -34,7 +34,7 @@ def read_gmail():
     daftar_html_mentah = []
     service = gmail_login()
 
-    query = 'from:noreply.livin@bankmandiri.co.id "detail transaksi" newer_than:7d'
+    query = 'from:noreply.livin@bankmandiri.co.id "detail transaksi" newer_than:1d'
 
     # minta daftar id email yang sesuai dengan query
     hasil = service.users().messages().list(userId="me", q=query).execute()
