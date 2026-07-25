@@ -11,7 +11,7 @@ mapping_info = {
     "Jam": "jam",
 
     "Nominal Transaksi": "nominal",
-    "Nominal Top-up": "nominal",
+    "Total Transaksi": "nominal",
     "Proteksi Jiwa": "nominal",  
 }
 
