@@ -1,6 +1,6 @@
 import os
 import base64
-import bs4
+import time
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -34,7 +34,10 @@ def read_gmail():
     daftar_html_mentah = []
     service = gmail_login()
 
-    query = 'from:noreply.livin@bankmandiri.co.id "detail transaksi" newer_than:1d'
+    sekarang = int(time.time())
+    kemarin = sekarang - 86400
+
+    query = f'from:noreply.livin@bankmandiri.co.id "detail transaksi" after:{kemarin} before:{sekarang}'
 
     # minta daftar id email yang sesuai dengan query
     hasil = service.users().messages().list(userId="me", q=query).execute()
