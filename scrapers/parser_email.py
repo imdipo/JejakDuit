@@ -57,7 +57,8 @@ def bersihkan_dan_gabungkan_waktu(tanggal_str, jam_str):
 
 def reformatting(list_email_bersih):
     for data in list_email_bersih:
-        angka_nominal = data["nominal"].replace("Rp ","").replace(".","").replace(",",".").strip()
+        angka_nominal = re.sub(r'[^\d,]', '', data["nominal"])
+        angka_nominal = angka_nominal.replace(",", ".")
         data["nominal"] = Decimal(angka_nominal)
 
         data["waktuTransaksi"] = bersihkan_dan_gabungkan_waktu(data["tanggal"], data["jam"])
