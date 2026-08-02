@@ -46,10 +46,20 @@ def parse_email(html_mentah):
 
     return html_bersih
 
+BULAN_INDO_TO_ENG = {
+    'Jan': 'Jan', 'Feb': 'Feb', 'Mar': 'Mar', 'Apr': 'Apr',
+    'Mei': 'May', 'Jun': 'Jun', 'Jul': 'Jul', 'Agu': 'Aug',
+    'Sep': 'Sep', 'Okt': 'Oct', 'Nov': 'Nov', 'Des': 'Dec'
+}
+
 def bersihkan_dan_gabungkan_waktu(tanggal_str, jam_str):
     jam_bersih = jam_str.replace(" WIB", "") 
-    waktu_gabungan = f"{tanggal_str} {jam_bersih}" # jadi '7 Jul 2026 13:29:14'
 
+    for bulan_indo, bulan_inggris in BULAN_INDO_TO_ENG.items():
+        if bulan_indo in tanggal_str:
+            tanggal_str = tanggal_str.replace(bulan_indo, bulan_inggris)
+
+    waktu_gabungan = f"{tanggal_str} {jam_bersih}" # jadi '7 Jul 2026 13:29:14'
     pola_waktu = "%d %b %Y %H:%M:%S"
     objek_datetime = datetime.strptime(waktu_gabungan, pola_waktu)
     
