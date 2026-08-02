@@ -1,6 +1,7 @@
 import os
 import base64
 import bs4
+import sys
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -35,7 +36,7 @@ def read_gmail():
     daftar_html_mentah = []
     service = gmail_login()
 
-    kemarin = (datetime.now() - timedelta(days=1)).strftime('%Y/%m/%d')
+    kemarin = (datetime.now() - timedelta(days=7)).strftime('%Y/%m/%d')
 
     # Query dengan sintaks yang rapi
     query = f'from:noreply.livin@bankmandiri.co.id "detail transaksi" after:{kemarin}'
@@ -48,7 +49,7 @@ def read_gmail():
 
     if not messages:
         print("tidak ada email mandiri baru")
-        return
+        sys.exit()
 
     print(f"ada! ketemu {len(messages)} email dari bank mandiri")
     
